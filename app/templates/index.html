@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ title }}</title>
+
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+  </head>
+
+  <body>
+    <header class="topbar">
+      <div class="container">
+        <div class="brand">
+          <div class="logo">₿</div>
+          <div class="brand-text">
+            <div class="title">Bitcoin Predictor</div>
+            <div class="subtitle">Dashboard interactivo (FastAPI + LSTM)</div>
+          </div>
+        </div>
+        <div class="controls">
+          <label class="control">
+            Ventana (días)
+            <select id="lastN">
+              <option value="90">90</option>
+              <option value="180">180</option>
+              <option value="365" selected>365</option>
+              <option value="730">730</option>
+              <option value="1500">1500</option>
+            </select>
+          </label>
+          <button id="refreshBtn" class="btn">Actualizar</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="grid">
+        <div class="card">
+          <div class="card-title">Predicción próxima apertura</div>
+          <div id="predBox" class="pred-box">
+            <div class="pred-main">
+              <div class="pred-value" id="predValue">—</div>
+              <div class="pred-sub" id="predSub">—</div>
+            </div>
+            <div class="pill" id="predDelta">—</div>
+          </div>
+          <div class="hint" id="predHint">
+            Si ves un error aquí, casi siempre es porque falta instalar TensorFlow.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Métricas (backtest)</div>
+          <div class="metrics">
+            <div class="metric">
+              <div class="metric-label">MAE</div>
+              <div class="metric-value" id="mae">—</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">RMSE</div>
+              <div class="metric-value" id="rmse">—</div>
+            </div>
+          </div>
+          <div class="hint">El backtest usa tu split 80/20 con LOOKBACK=60.</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Insights (educativo)</div>
+          <div class="insights">
+            <div class="insight-row">
+              <span>Momentum</span><strong id="momentum">—</strong>
+            </div>
+            <div class="insight-row">
+              <span>Volatilidad anualizada</span><strong id="vol">—</strong>
+            </div>
+            <div class="insight-row">
+              <span>Riesgo</span><strong id="risk">—</strong>
+            </div>
+          </div>
+          <div class="disclaimer" id="disclaimer">—</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-title">Precio histórico (OHLC + volumen)</div>
+        <div id="priceChart" class="chart"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-title">Backtest: real vs predicción</div>
+        <div id="backtestChart" class="chart"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <span>Hecho para demo educativa. No es recomendación de inversión.</span>
+        <a class="link" href="/api/health" target="_blank" rel="noreferrer">/api/health</a>
+      </div>
+    </footer>
+
+    <script src="/static/js/app.js"></script>
+  </body>
+</html>
+

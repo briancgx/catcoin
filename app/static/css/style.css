@@ -1,0 +1,149 @@
+:root{
+  --bg0:#0b1020;
+  --bg1:#0f1631;
+  --card:#121a36;
+  --muted:#9aa6c4;
+  --text:#e8ecff;
+  --line:rgba(255,255,255,.09);
+  --green:#2fd1a5;
+  --red:#ff4d6d;
+  --blue:#8aa4ff;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  color:var(--text);
+  background:
+    radial-gradient(1200px 600px at 20% -20%, rgba(138,164,255,.25), transparent 60%),
+    radial-gradient(900px 600px at 110% 10%, rgba(47,209,165,.18), transparent 60%),
+    linear-gradient(180deg, var(--bg0), var(--bg1));
+}
+
+.container{max-width:1100px;margin:0 auto;padding:0 18px}
+
+.topbar{
+  position:sticky;top:0;z-index:20;
+  background:rgba(11,16,32,.75);
+  backdrop-filter: blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.topbar .container{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px;
+}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{
+  width:40px;height:40px;border-radius:12px;
+  display:grid;place-items:center;
+  background:linear-gradient(135deg, rgba(138,164,255,.25), rgba(47,209,165,.20));
+  border:1px solid var(--line);
+  font-weight:700;
+}
+.brand-text .title{font-weight:700;letter-spacing:.2px}
+.brand-text .subtitle{font-size:12px;color:var(--muted);margin-top:2px}
+
+.controls{display:flex;align-items:end;gap:10px}
+.control{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--muted)}
+select{
+  background:rgba(18,26,54,.85);
+  color:var(--text);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:10px 12px;
+  outline:none;
+}
+.btn{
+  border:1px solid var(--line);
+  background:linear-gradient(135deg, rgba(138,164,255,.20), rgba(47,209,165,.16));
+  color:var(--text);
+  border-radius:12px;
+  padding:11px 14px;
+  cursor:pointer;
+}
+.btn:hover{filter:brightness(1.08)}
+
+main.container{padding:18px}
+
+.grid{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:14px;
+  margin-bottom:14px;
+}
+@media (max-width: 980px){
+  .grid{grid-template-columns:1fr}
+  .controls{display:none}
+}
+
+.card{
+  background:rgba(18,26,54,.72);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:14px;
+  box-shadow: 0 10px 28px rgba(0,0,0,.25);
+}
+.card-title{font-weight:650;margin-bottom:10px}
+.hint{color:var(--muted);font-size:12px;margin-top:10px}
+
+.pred-box{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:12px;
+  background:rgba(0,0,0,.14);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:14px;
+}
+.pred-value{font-size:28px;font-weight:800}
+.pred-sub{color:var(--muted);font-size:12px;margin-top:4px}
+.pill{
+  border-radius:999px;
+  padding:10px 12px;
+  border:1px solid rgba(255,255,255,.10);
+  font-weight:650;
+  font-size:12px;
+  min-width:160px;
+  text-align:center;
+}
+.pill-up{background:rgba(47,209,165,.18);color:var(--green)}
+.pill-down{background:rgba(255,77,109,.16);color:var(--red)}
+.pill-flat{background:rgba(138,164,255,.12);color:var(--blue)}
+
+.metrics{display:flex;gap:14px}
+.metric{
+  flex:1;
+  padding:12px;
+  border-radius:14px;
+  background:rgba(0,0,0,.14);
+  border:1px solid rgba(255,255,255,.07);
+}
+.metric-label{color:var(--muted);font-size:12px}
+.metric-value{font-size:20px;font-weight:800;margin-top:6px}
+
+.insights{display:flex;flex-direction:column;gap:10px}
+.insight-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 12px;
+  border-radius:14px;
+  background:rgba(0,0,0,.14);
+  border:1px solid rgba(255,255,255,.07);
+}
+.disclaimer{margin-top:10px;color:var(--muted);font-size:12px;line-height:1.35}
+
+.chart{height:420px}
+@media (max-width: 980px){
+  .chart{height:380px}
+}
+
+.footer{
+  margin-top:16px;
+  border-top:1px solid var(--line);
+  color:var(--muted);
+  font-size:12px;
+  padding:16px 0;
+}
+.footer .container{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.link{color:var(--muted);text-decoration:none}
+.link:hover{color:var(--text)}
+
