@@ -15,12 +15,21 @@
   <header class="topbar">
     <div class="container">
       <div class="brand">
-        <div class="logo">₿</div>
+        <a href="/" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px;"
+          title="Volver al Inicio">
+          <div class="logo">₿</div>
+        </a>
         <div class="brand-text">
           <div class="title">Bitcoin Predictor</div>
           <div class="subtitle">Dashboard interactivo (FastAPI + LSTM)</div>
         </div>
       </div>
+      <!-- Botón volver explícito -->
+      <a href="/" class="btn-secondary"
+        style="padding: 6px 14px; font-size: 13px; margin-left: auto; margin-right: 16px; display: inline-flex; align-items: center;">
+        ← Inicio
+      </a>
+
       <!-- Icono de configuración con menú desplegable de tarjetas -->
       <div class="menu-wrapper" id="menuWrapper">
         <button class="menu-trigger" id="menuTrigger" aria-label="Opciones" aria-expanded="false">

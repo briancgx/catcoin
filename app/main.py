@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import os
+from datetime import date
 
 from dotenv import load_dotenv
 
@@ -32,16 +33,49 @@ app.mount("/static", StaticFiles(directory=ROOT / "app" / "static"), name="stati
 templates = Jinja2Templates(directory=str(ROOT / "app" / "templates"))
 
 _predictor: Predictor | None = None
+_dashboard_cache: dict[tuple[int, date], dict] = {}
+_predict_next_cache: dict[date, dict] = {}
 
+def check_and_update_dataset():
+    global _predictor
+    today = date.today()
+    if DATASET_PATH.exists():
+        import datetime
+        mtime = os.path.getmtime(DATASET_PATH)
+        mdate = datetime.date.fromtimestamp(mtime)
+        if mdate == today:
+            return  # Dataset already up-to-date today
+
+    import subprocess
+    import sys
+    script_path = ROOT / "descargar.py"
+    print(f"Updating dataset for {today} using {script_path}...")
+    try:
+        subprocess.run([sys.executable, str(script_path)], cwd=str(ROOT), check=True)
+        _predictor = None  # Force reload after update
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to update dataset: {e}")
 
 def get_predictor() -> Predictor:
     global _predictor
+    check_and_update_dataset()
     if _predictor is None:
         _predictor = Predictor(dataset_path=DATASET_PATH, model_path=MODEL_PATH)
     return _predictor
 
 
 @app.get("/", response_class=HTMLResponse)
+def landing(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse(
+        "landing.html",
+        {
+            "request": request,
+            "title": "Bitcoin Predictor — Inicio",
+        },
+    )
+
+
+@app.get("/dashboard", response_class=HTMLResponse)
 def index(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(
         "index.html",
@@ -70,9 +104,17 @@ def health() -> dict:
 
 @app.get("/api/dashboard")
 def dashboard(last_n: int = Query(365, ge=30, le=3000)) -> dict:
+    today = date.today()
+    cache_key = (last_n, today)
+    if cache_key in _dashboard_cache:
+        return _dashboard_cache[cache_key]
+
     try:
         p = get_predictor()
-        return build_dashboard_payload(p, last_n=last_n)
+        payload = build_dashboard_payload(p, last_n=last_n)
+        _dashboard_cache.clear()  # maintain only the latest query to avoid memory bloat
+        _dashboard_cache[cache_key] = payload
+        return payload
     except ModelLoadError as e:
         raise HTTPException(status_code=500, detail=f"No se pudo cargar el modelo: {e}") from e
     except PredictorError as e:
@@ -81,9 +123,15 @@ def dashboard(last_n: int = Query(365, ge=30, le=3000)) -> dict:
 
 @app.get("/api/predict-next")
 def predict_next() -> dict:
+    today = date.today()
+    if today in _predict_next_cache:
+        return _predict_next_cache[today]
+
     try:
         p = get_predictor()
         pred = p.predict_next_open()
+        _predict_next_cache.clear()
+        _predict_next_cache[today] = pred
         return pred
     except ModelLoadError as e:
         raise HTTPException(status_code=500, detail=f"No se pudo cargar el modelo: {e}") from e

@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bitcoin: La Evolución del Dinero</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+</head>
+
+<body class="landing-body">
+    <!-- Navbar -->
+    <nav class="landing-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="logo logo-glow">₿</div>
+                <span class="nav-title">Bitcoin Predictor</span>
+            </div>
+            <div class="nav-links">
+                <a href="#what-is-btc" class="nav-link">¿Qué es?</a>
+                <a href="#history" class="nav-link">Historia</a>
+                <a href="#video" class="nav-link">Aprende</a>
+                <a href="#about" class="nav-link">Equipo</a>
+                <a href="/dashboard" class="nav-cta-btn">Ir al Predictor <svg viewBox="0 0 24 24" fill="none"
+                        class="btn-icon">
+                        <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg></a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-bg-glows">
+            <div class="glow-orb orb-1"></div>
+            <div class="glow-orb orb-2"></div>
+        </div>
+        <div class="hero-content">
+            <div class="hero-badge">IA + Blockchain ⚡</div>
+            <h1 class="hero-title">El futuro de las finanzas,<br><span class="text-gradient">analizado con Inteligencia
+                    Artificial.</span></h1>
+            <p class="hero-subtitle">Descubre qué es Bitcoin, conoce su historia y utiliza nuestro modelo de machine
+                learning (LSTM) gratuito para predecir movimientos de mercado.</p>
+            <div class="hero-buttons">
+                <a href="/dashboard" class="btn-primary">Lanzar Dashboard Mágico</a>
+                <a href="#what-is-btc" class="btn-secondary">Saber más</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- What is BTC Section -->
+    <section id="what-is-btc" class="landing-section" data-section="what-is">
+        <div class="section-container">
+            <h2 class="section-title">¿Qué es <span class="text-gradient">Bitcoin</span>?</h2>
+            <p class="section-description">Bitcoin es una moneda digital descentralizada sin banco central o un
+                administrador único, que se puede enviar de usuario a usuario en la red bitcoin peer-to-peer sin la
+                necesidad de intermediarios.</p>
+
+            <div class="features-grid">
+                <div class="feature-card glass-panel" data-ai-trigger="descentralizacion">
+                    <div class="feature-icon">🌐</div>
+                    <h3>Descentralizado</h3>
+                    <p>Ningún gobierno o banco controla el suministro de Bitcoin. Funciona a través de un consenso
+                        matemático global.</p>
+                </div>
+                <div class="feature-card glass-panel" data-ai-trigger="escasez">
+                    <div class="feature-icon">💎</div>
+                    <h3>Escasez Absoluta</h3>
+                    <p>Solo existirán 21 millones de bitcoins en la historia, haciéndolo un activo anti-inflacionario
+                        por diseño.</p>
+                </div>
+                <div class="feature-card glass-panel" data-ai-trigger="seguridad">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>Criptografía</h3>
+                    <p>La red cuenta con la mayor potencia computacional del planeta garantizando que las transacciones
+                        sean irreversibles y seguras.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- History Section -->
+    <section id="history" class="landing-section section-alt" data-section="history">
+        <div class="section-container">
+            <h2 class="section-title">La Historia de <span class="text-gradient">Satoshi Nakamoto</span></h2>
+            <div class="timeline">
+                <div class="timeline-item glass-panel" data-ai-trigger="historia-2008">
+                    <div class="timeline-year">2008</div>
+                    <div class="timeline-content">
+                        <h3>El Whitepaper</h3>
+                        <p>Satoshi Nakamoto publica "Bitcoin: A Peer-to-Peer Electronic Cash System" durante la crisis
+                            financiera global.</p>
+                    </div>
+                </div>
+                <div class="timeline-item glass-panel" data-ai-trigger="historia-2009">
+                    <div class="timeline-year">2009</div>
+                    <div class="timeline-content">
+                        <h3>Bloque Génesis</h3>
+                        <p>Se mina el primer bloque de Bitcoin incluyengo el mensaje sobre el rescate a los bancos
+                            británicos. Nace la red.</p>
+                    </div>
+                </div>
+                <div class="timeline-item glass-panel" data-ai-trigger="historia-2010">
+                    <div class="timeline-year">2010</div>
+                    <div class="timeline-content">
+                        <h3>Bitcoin Pizza Day</h3>
+                        <p>Laszlo Hanyecz compra dos pizzas de Papa John's por 10,000 BTC. La primera transacción
+                            comercial real.</p>
+                    </div>
+                </div>
+                <div class="timeline-item glass-panel" data-ai-trigger="historia-2024">
+                    <div class="timeline-year">2024</div>
+                    <div class="timeline-content">
+                        <h3>Aprobación ETF</h3>
+                        <p>La SEC de EE.UU. aprueba los primeros ETFs spot de Bitcoin, validándolo como activo
+                            institucional masivo.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Video Section -->
+    <section id="video" class="landing-section" data-section="video">
+        <div class="section-container">
+            <h2 class="section-title">Aprende Mágicamente <span class="text-gradient">en 5 minutos</span></h2>
+            <p class="section-description">¿Eres nuevo en el mundo cripto? Te dejamos este excelente video que en menos
+                de 5 minutos te explica la genialidad técnica de la blockchain.</p>
+
+            <div class="video-container glass-panel">
+                <iframe width="100%" height="500" src="https://www.youtube.com/embed/s4g1XFU8Gto"
+                    title="Como funciona Bitcoin" frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowfullscreen></iframe>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Us Section -->
+    <section id="about" class="landing-section section-alt" data-section="about">
+        <div class="section-container">
+            <h2 class="section-title">¿Quiénes <span class="text-gradient">Somos?</span></h2>
+            <div class="about-grid">
+                <div class="about-text glass-panel">
+                    <h3>Nuestra Misión</h3>
+                    <p>Somos un equipo de entusiastas financieros y científicos de datos y programadores que buscan
+                        democratizar el acceso al análisis técnico avanzado.</p>
+                    <br>
+                    <p>Hemos construido esta plataforma usando redes neuronales LSTM (`Long Short-Term Memory`) para
+                        predecir el comportamiento del mercado de criptomonedas y empaquetado todo en una interfaz
+                        moderna y accesible para cualquier persona.</p>
+                </div>
+                <div class="about-stats glass-panel">
+                    <div class="stat-item">
+                        <span class="stat-num">AI</span>
+                        <span class="stat-label">Modelos Predictivos</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-num">100%</span>
+                        <span class="stat-label">Open Source Tech</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-num">24/7</span>
+                        <span class="stat-label">Análisis de Mercado</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="landing-footer">
+        <div class="logo logo-glow"
+            style="margin: 0 auto 1.5rem; width: 44px; height: 44px; display: grid; place-items: center;">₿</div>
+        <p>© 2026 Bitcoin LSTM Predictor. Hecho con ❤️, Python y JavaScript.</p>
+    </footer>
+
+    <!-- Tooltip flotante de IA contextual (Igual que en Dashboard) -->
+    <div id="ctxTooltip" class="ctx-tooltip" hidden>
+        <div class="ctx-header">
+            <span class="ctx-avatar">🤖</span>
+            <span class="ctx-title">IA explica esto</span>
+            <button class="ctx-close" id="ctxClose" aria-label="Cerrar">✕</button>
+        </div>
+        <div class="ctx-body" id="ctxBody">
+            <div class="ctx-loading" id="ctxLoading">
+                <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
+            </div>
+            <div class="ctx-text" id="ctxText" hidden></div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+
+</html>

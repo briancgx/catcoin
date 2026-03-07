@@ -488,6 +488,29 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Carga inicial
-  load().catch(function () { });
+  // ── Landing Page AI Listeners ──
+  const landingTriggers = document.querySelectorAll("[data-ai-trigger]");
+  landingTriggers.forEach((el) => {
+    el.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const topic = el.getAttribute("data-ai-trigger");
+      let prompt = "";
+      if (topic === "descentralizacion") prompt = "Explícame de forma muy breve por qué la descentralización de Bitcoin es tan importante en comparación con los bancos tradicionales.";
+      else if (topic === "escasez") prompt = "Explica en pocas palabras por qué la escasez absoluta de Bitcoin (solo 21 millones) lo hace diferente del dinero fiduciario.";
+      else if (topic === "seguridad") prompt = "Resume cómo funciona la criptografía y la minería que le da tanta seguridad a la red Bitcoin.";
+      else if (topic === "historia-2008") prompt = "Resume brevemente la crisis del 2008 y cómo influyó en que Satoshi Nakamoto publicara el Whitepaper de Bitcoin.";
+      else if (topic === "historia-2009") prompt = "¿Qué es el bloque Génesis de Bitcoin y qué mensaje incluyó Satoshi Nakamoto en él? Sé breve.";
+      else if (topic === "historia-2010") prompt = "Resume la historia graciosa e histórica del 'Bitcoin Pizza Day' de 2010.";
+      else if (topic === "historia-2024") prompt = "¿Qué impacto ha tenido la reciente aprobación de los ETFs institucionales de Bitcoin en 2024? Dímelo de forma resumida.";
+
+      if (prompt) {
+        askContext(prompt, e.clientX, e.clientY);
+      }
+    });
+  });
+
+  // Carga inicial (Solo si existe un elemento propio del dashboard)
+  if (document.getElementById("priceChart")) {
+    load().catch(function () { });
+  }
 });
