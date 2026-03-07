@@ -1,108 +1,282 @@
 <!doctype html>
 <html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{{ title }}</title>
 
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
-    <link rel="stylesheet" href="/static/css/style.css" />
-    <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
-  </head>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ title }}</title>
 
-  <body>
-    <header class="topbar">
-      <div class="container">
-        <div class="brand">
-          <div class="logo">₿</div>
-          <div class="brand-text">
-            <div class="title">Bitcoin Predictor</div>
-            <div class="subtitle">Dashboard interactivo (FastAPI + LSTM)</div>
-          </div>
-        </div>
-        <div class="controls">
-          <label class="control">
-            Ventana (días)
-            <select id="lastN">
-              <option value="90">90</option>
-              <option value="180">180</option>
-              <option value="365" selected>365</option>
-              <option value="730">730</option>
-              <option value="1500">1500</option>
-            </select>
-          </label>
-          <button id="refreshBtn" class="btn">Actualizar</button>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="container">
+      <div class="brand">
+        <div class="logo">₿</div>
+        <div class="brand-text">
+          <div class="title">Bitcoin Predictor</div>
+          <div class="subtitle">Dashboard interactivo (FastAPI + LSTM)</div>
         </div>
       </div>
-    </header>
+      <!-- Icono de configuración con menú desplegable de tarjetas -->
+      <div class="menu-wrapper" id="menuWrapper">
+        <button class="menu-trigger" id="menuTrigger" aria-label="Opciones" aria-expanded="false">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+        </button>
 
-    <main class="container">
-      <section class="grid">
-        <div class="card">
-          <div class="card-title">Predicción próxima apertura</div>
-          <div id="predBox" class="pred-box">
-            <div class="pred-main">
-              <div class="pred-value" id="predValue">—</div>
-              <div class="pred-sub" id="predSub">—</div>
+        <div class="menu-panel" id="menuPanel" aria-hidden="true">
+          <div class="menu-cards">
+
+            <!-- Tarjeta 1: Ventana de días -->
+            <div class="menu-card menu-card--selector">
+              <div class="menu-card-icon">📅</div>
+              <div class="menu-card-label">Ventana</div>
+              <div class="menu-card-subtext">Período de datos</div>
+              <select id="lastN" class="menu-select">
+                <option value="90">90 días</option>
+                <option value="180">180 días</option>
+                <option value="365" selected>365 días</option>
+                <option value="730">730 días</option>
+                <option value="1500">1500 días</option>
+              </select>
             </div>
-            <div class="pill" id="predDelta">—</div>
+
+            <!-- Tarjeta 2: Actualizar datos -->
+            <div class="menu-card menu-card--action" id="refreshCard" role="button" tabindex="0">
+              <div class="menu-card-icon">🔄</div>
+              <div class="menu-card-label">Actualizar</div>
+              <div class="menu-card-subtext">Recargar dashboard</div>
+              <button id="refreshBtn" class="menu-action-btn">Ejecutar</button>
+            </div>
+
+            <!-- Tarjeta 3: Estado API -->
+            <div class="menu-card menu-card--health" id="healthCard">
+              <div class="menu-card-icon">🩺</div>
+              <div class="menu-card-label">API Health</div>
+              <div class="menu-card-subtext">Estado del servidor</div>
+              <!-- Resultado inline -->
+              <div class="health-status" id="healthStatus" style="display:none">
+                <span class="health-dot" id="healthDot"></span>
+                <span class="health-text" id="healthText"></span>
+              </div>
+              <div class="health-rows" id="healthRows" style="display:none"></div>
+              <button class="menu-action-btn" id="healthBtn">Verificar</button>
+            </div>
+
           </div>
-          <div class="hint" id="predHint">
-            Si ves un error aquí, casi siempre es porque falta instalar TensorFlow.
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="grid">
+
+      <!-- ── Predicción -->
+      <div class="card card-pred" id="cardPred">
+        <div class="card-header">
+          <div class="card-icon-wrap card-icon--pred">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">Próxima Apertura</div>
+            <div class="card-subtitle">Predicción LSTM</div>
+          </div>
+        </div>
+        <div class="pred-value-big" id="predValue">—</div>
+        <div class="pill" id="predDelta">—</div>
+        <div class="pred-sub" id="predSub">—</div>
+        <div class="hint" id="predHint">Cargando predicción…</div>
+      </div>
+
+      <!-- ── Métricas -->
+      <div class="card card-metrics" id="cardMetrics">
+        <div class="card-header">
+          <div class="card-icon-wrap card-icon--metrics">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <line x1="18" y1="20" x2="18" y2="10" />
+              <line x1="12" y1="20" x2="12" y2="4" />
+              <line x1="6" y1="20" x2="6" y2="14" />
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">Métricas</div>
+            <div class="card-subtitle">Backtest 80/20</div>
+          </div>
+        </div>
+        <div class="metrics">
+          <div class="metric">
+            <div class="metric-label">Error medio (MAE)</div>
+            <div class="metric-value" id="mae">—</div>
+            <div class="metric-badge">Menor = más preciso</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Error cuadrático (RMSE)</div>
+            <div class="metric-value" id="rmse">—</div>
+            <div class="metric-badge">LOOKBACK = 60 días</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Insights colapsable -->
+      <div class="card insights-card" id="cardInsights">
+        <button class="insights-toggle" id="insightsToggle" aria-expanded="false">
+          <div class="card-icon-wrap card-icon--insights">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </div>
+          <div class="insights-toggle-text">
+            <span class="card-title">Insights</span>
+            <span class="card-subtitle">Análisis del período</span>
+          </div>
+          <svg class="insights-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </button>
+
+        <!-- Vista previa compacta (visible solo cuando está cerrado) -->
+        <div class="insights-preview" id="insightsPreview">
+          <div class="ipreview-chip ipreview-momentum">
+            <span class="ipreview-label">Momentum</span>
+            <span class="ipreview-val" id="previewMomentum">—</span>
+          </div>
+          <div class="ipreview-chip ipreview-vol">
+            <span class="ipreview-label">Volatilidad</span>
+            <span class="ipreview-val" id="previewVol">—</span>
+          </div>
+          <div class="ipreview-chip ipreview-risk">
+            <span class="ipreview-label">Riesgo</span>
+            <span class="ipreview-val" id="previewRisk">—</span>
           </div>
         </div>
 
-        <div class="card">
-          <div class="card-title">Métricas (backtest)</div>
-          <div class="metrics">
-            <div class="metric">
-              <div class="metric-label">MAE</div>
-              <div class="metric-value" id="mae">—</div>
+        <div class="insight-cards" id="insightCardsPanel">
+          <!-- Momentum -->
+          <div class="icard icard-momentum">
+            <div class="icard-top">
+              <span class="icard-dot"></span>
+              <span class="icard-label">Momentum</span>
             </div>
-            <div class="metric">
-              <div class="metric-label">RMSE</div>
-              <div class="metric-value" id="rmse">—</div>
-            </div>
+            <div class="icard-value" id="momentumFull">—</div>
+            <div class="icard-desc">Tendencia del período</div>
           </div>
-          <div class="hint">El backtest usa tu split 80/20 con LOOKBACK=60.</div>
-        </div>
-
-        <div class="card">
-          <div class="card-title">Insights (educativo)</div>
-          <div class="insights">
-            <div class="insight-row">
-              <span>Momentum</span><strong id="momentum">—</strong>
+          <!-- Volatilidad -->
+          <div class="icard icard-vol">
+            <div class="icard-top">
+              <span class="icard-dot"></span>
+              <span class="icard-label">Volatilidad</span>
             </div>
-            <div class="insight-row">
-              <span>Volatilidad anualizada</span><strong id="vol">—</strong>
+            <div class="icard-value" id="volFull">—</div>
+            <div class="icard-desc">Fluctuación anual</div>
+          </div>
+          <!-- Riesgo -->
+          <div class="icard icard-risk">
+            <div class="icard-top">
+              <span class="icard-dot"></span>
+              <span class="icard-label">Riesgo</span>
             </div>
-            <div class="insight-row">
-              <span>Riesgo</span><strong id="risk">—</strong>
-            </div>
+            <div class="icard-value icard-value--lg" id="riskFull">—</div>
+            <div class="icard-desc">Nivel de exposición</div>
           </div>
           <div class="disclaimer" id="disclaimer">—</div>
         </div>
-      </section>
-
-      <section class="card">
-        <div class="card-title">Precio histórico (OHLC + volumen)</div>
-        <div id="priceChart" class="chart"></div>
-      </section>
-
-      <section class="card">
-        <div class="card-title">Backtest: real vs predicción</div>
-        <div id="backtestChart" class="chart"></div>
-      </section>
-    </main>
-
-    <footer class="footer">
-      <div class="container">
-        <span>Hecho para demo educativa. No es recomendación de inversión.</span>
-        <a class="link" href="/api/health" target="_blank" rel="noreferrer">/api/health</a>
       </div>
-    </footer>
 
-    <script src="/static/js/app.js"></script>
-  </body>
+    </section>
+
+    <section class="card">
+      <div class="card-title">Precio histórico (OHLC + volumen)</div>
+      <div id="priceChart" class="chart"></div>
+    </section>
+
+    <section class="card card-separada">
+      <div class="card-title">Backtest: real vs predicción</div>
+      <div id="backtestChart" class="chart"></div>
+    </section>
+
+    <section class="card assistant-card">
+      <!-- Encabezado con branding de IA -->
+      <div class="chat-header">
+        <div class="chat-header-left">
+          <div class="ai-avatar-big">🤖</div>
+          <div>
+            <div class="chat-title">Asistente IA · Bitcoin</div>
+            <div class="chat-subtitle">Inteligencia Artificial · Responde en tiempo real</div>
+          </div>
+        </div>
+        <span class="ai-badge">IA activa</span>
+      </div>
+
+      <div class="chat-container">
+        <div id="assistantMessages" class="assistant-messages">
+          <div class="assistant-message assistant-message-assistant">
+            <div class="assistant-avatar">🤖</div>
+            <div class="assistant-bubble">
+              <div class="assistant-message-body">
+                ¡Hola! Soy una <strong>IA especializada en Bitcoin</strong>. Puedes preguntarme sobre las gráficas,
+                el modelo de predicción LSTM, conceptos de trading o gestión de riesgo.
+                No doy recomendaciones personales de inversión.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="assistantTyping" class="assistant-typing" hidden>
+          <div class="assistant-avatar">🤖</div>
+          <div class="assistant-bubble assistant-typing-bubble">
+            <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
+          </div>
+        </div>
+        <div class="assistant-input-wrap">
+          <input id="assistantQuestion" class="assistant-input-field" type="text" placeholder="Pregúntale algo a la IA…"
+            autocomplete="off" />
+          <button id="assistantSendBtn" type="button" class="btn assistant-input-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13" />
+              <polygon points="22 2 15 22 11 13 2 9 22 2" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Tooltip flotante de IA contextual -->
+  <div id="ctxTooltip" class="ctx-tooltip" hidden>
+    <div class="ctx-header">
+      <span class="ctx-avatar">🤖</span>
+      <span class="ctx-title">IA explica esto</span>
+      <button class="ctx-close" id="ctxClose" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="ctx-body" id="ctxBody">
+      <div class="ctx-loading" id="ctxLoading">
+        <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
+      </div>
+      <div class="ctx-text" id="ctxText" hidden></div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <span>Hecho para demo educativa. No es recomendación de inversión.</span>
+      <a class="link" href="/api/health" target="_blank" rel="noreferrer">/api/health</a>
+    </div>
+  </footer>
+
+  <script src="/static/js/app.js"></script>
+</body>
+
 </html>
-

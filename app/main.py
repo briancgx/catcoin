@@ -1,11 +1,19 @@
 from __future__ import annotations
 
 from pathlib import Path
+import os
+
+from dotenv import load_dotenv
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
+
+from openai import OpenAI
+
+load_dotenv()
 
 from app.services.predictor import (
     ModelLoadError,
@@ -81,4 +89,79 @@ def predict_next() -> dict:
         raise HTTPException(status_code=500, detail=f"No se pudo cargar el modelo: {e}") from e
     except PredictorError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+class AssistantRequest(BaseModel):
+    question: str
+    context: dict | None = None
+
+
+@app.post("/api/assistant")
+def assistant(req: AssistantRequest) -> dict:
+    api_key_groq = os.getenv("GROQ_API_KEY")
+    api_key_openai = os.getenv("OPENAI_API_KEY")
+
+    if api_key_groq:
+        client = OpenAI(api_key=api_key_groq, base_url="https://api.groq.com/openai/v1")
+        model_name = "llama-3.3-70b-versatile"
+    elif api_key_openai:
+        client = OpenAI(api_key=api_key_openai)
+        model_name = "gpt-3.5-turbo"
+    else:
+        raise HTTPException(
+            status_code=500,
+            detail="Falta configurar GROQ_API_KEY o OPENAI_API_KEY en el archivo .env para el asistente.",
+        )
+
+    context_text = ""
+    if req.context:
+        ctx = req.context
+        context_lines = [
+            "Datos del dashboard actual (usa estos números para responder):",
+            f"Fecha más reciente: {ctx.get('last_date')}",
+            f"Precio apertura más reciente: {ctx.get('last_open')}",
+            f"Precio cierre más reciente: {ctx.get('last_close')}",
+            f"Predicción del modelo LSTM para próxima apertura: {ctx.get('open_pred_next')} USD (fecha: {ctx.get('date_predicted_for')})",
+            f"Delta predicción: {ctx.get('delta')} USD ({ctx.get('delta_pct')}%)",
+            f"MAE backtest: {ctx.get('mae')}",
+            f"RMSE backtest: {ctx.get('rmse')}",
+            f"Momentum absoluto: {ctx.get('momentum_abs')}",
+            f"Momentum porcentual: {ctx.get('momentum_pct')}%",
+            f"Volatilidad anualizada: {ctx.get('annualized_volatility')}",
+            f"Riesgo: {ctx.get('risk_note')}",
+            f"Disclaimer: {ctx.get('disclaimer')}",
+        ]
+        context_text = "\n".join(str(x) for x in context_lines)
+
+    system_prompt = """Eres un asistente experto en Bitcoin, análisis técnico y finanzas cuantitativas. Tienes acceso a datos reales del dashboard y a un modelo LSTM de predicción de precios.
+
+Cómo responder:
+1. Usa los datos del contexto solo cuando sean útiles para la respuesta. No los menciones todos de golpe ni de forma mecánica.
+2. Da respuestas honestas y directas. Si alguien pregunta si es buen momento para comprar o sobre el futuro del precio, da tu análisis basado en los datos disponibles (tendencia, volatilidad, predicción). No evadas la pregunta con disclaimers.
+3. Sé claro cuando algo es incierto: el mercado es impredecible y el modelo LSTM tiene un margen de error (MAE/RMSE). Menciona esto solo si es relevante.
+4. Escribe en texto plano sin formato markdown: sin asteriscos, sin listas con guiones, sin numeración. Párrafos fluidos y naturales.
+5. Sé conciso. Responde lo que se pregunta, sin relleno."""
+
+    try:
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {
+                "role": "user",
+                "content": f"{context_text}\n\nPregunta del usuario: {req.question}",
+            },
+        ]
+
+        completion = client.chat.completions.create(
+            model=model_name,
+            messages=messages,
+            temperature=0.3,
+            max_tokens=600,
+        )
+        answer = completion.choices[0].message.content
+        return {"answer": answer}
+    except Exception as e:  # pragma: no cover - defensivo
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error al llamar al modelo del asistente: {e}",
+        ) from e
 
