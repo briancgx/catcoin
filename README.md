@@ -1,40 +1,15 @@
 # CatCoin — Bitcoin Predictor
 
-Plataforma web educativa que predice el precio de apertura de Bitcoin del dia siguiente utilizando una red neuronal LSTM (Long Short-Term Memory), desarrollada para el **Hackathon Bitcoin Mexico 2026**, el primer hackathon educativo de Bitcoin en Mexico.
-
-> **Disclaimer:** Proyecto educativo. No es asesoria financiera. Bitcoin es volatil; gestiona riesgo.
+Plataforma web que combina redes neuronales LSTM (Long Short-Term Memory) con modelos de lenguaje (LLM) para analizar el comportamiento historico de Bitcoin y generar estimaciones sobre su precio de apertura, acompanadas de un asistente de inteligencia artificial que interpreta los datos en tiempo real.
 
 ---
 
-## Sobre el Hackathon
+## Propuesta de valor
 
-| Detalle | Info |
-|---|---|
-| **Evento** | [Hackathon Bitcoin Mexico](https://www.hackathonbitcoin.com/es) |
-| **Tematica** | Herramientas educativas sobre Bitcoin — 39 horas para construir |
-| **Fechas** | 6-7 marzo 2026 |
-| **Modalidad** | Online + sedes presenciales (La Casa de Satoshi CDMX, Hub Tecnologico Merida) |
-| **Premios** | $16,000 MXN totales (pagados en Bitcoin) |
-
-### Criterios de evaluacion
-
-| Criterio | Puntos | Como lo cumplimos |
-|---|---|---|
-| Precision conceptual Bitcoin | 10 pts | Landing educativa con historia, whitepaper, escasez, descentralizacion |
-| Interactividad y engagement | 10 pts | Dashboard interactivo, graficas clickeables con IA contextual, chatbot |
-| Utilidad y potencial adopcion | 10 pts | Datos reales de Binance, prediccion diaria automatizada, UI en espanol |
-| Diseno y UX | 5 pts | Glassmorphism dark mode, responsive, animaciones, Plotly.js |
-| Ejecucion tecnica | 5 pts | LSTM con TensorFlow, FastAPI, API de Binance, integracion con LLM |
-
----
-
-## Que hace este proyecto
-
-1. **Descarga datos historicos** de Bitcoin (BTCUSDT) desde la API de Binance (~3100+ dias de velas diarias desde 2017)
-2. **Entrena una red neuronal LSTM** con series de tiempo para aprender patrones en precio y volumen
-3. **Predice el precio de apertura** del dia siguiente basandose en los ultimos 60 dias de datos
-4. **Despliega un dashboard web** con graficas interactivas, metricas de backtest y un asistente IA
-5. **Actualiza datos automaticamente** cada dia desde Binance sin intervencion manual
+- **Modelo LSTM entrenado con +3100 dias de datos reales** de Bitcoin desde Binance, capaz de identificar patrones temporales en series de precio y volumen
+- **Asistente IA contextual** que no responde en vacio: recibe las metricas reales del dashboard (prediccion, MAE, RMSE, volatilidad, momentum) y genera analisis fundamentados
+- **Interactividad total**: cada grafica, tarjeta y seccion del dashboard es clickeable y dispara consultas contextuales a la IA
+- **Datos vivos**: el sistema se auto-actualiza diariamente desde la API de Binance sin intervencion manual
 
 ---
 
@@ -64,11 +39,11 @@ Binance API ──> CSV dataset    Entrena LSTM ──> modelo .h5
 
 ### Pipeline de datos
 
-- **Fuente:** API publica de Binance (`/api/v3/klines`), par BTCUSDT, intervalo diario
+- **Fuente:** API publica de Binance (`/api/v3/klines`), par BTCUSDT, velas diarias
 - **Features de entrada (X):** `open`, `high`, `low`, `close`, `volume` (5 columnas)
-- **Target (y):** `open` del dia siguiente (`open.shift(-1)`)
+- **Target (y):** precio de apertura del siguiente periodo (`open.shift(-1)`)
 - **Normalizacion:** MinMaxScaler independiente para X e y (escala a rango [0, 1])
-- **Ventana temporal (lookback):** 60 dias — cada muestra de entrada contiene 60 dias consecutivos
+- **Ventana temporal (lookback):** 60 periodos — cada muestra contiene 60 registros consecutivos
 - **Forma de los datos:** `X_seq = (3062, 60, 5)` — 3062 muestras, 60 timesteps, 5 features
 - **Split:** 80% train (2449 muestras) / 20% test (613 muestras), secuencial sin shuffle
 
@@ -85,10 +60,10 @@ Dense (1, linear)        (None, 1)        33
 Total:                                    20,033 (~78 KB)
 ```
 
-- **LSTM (64 unidades):** Capa recurrente con celdas de memoria y gates (forget, input, output) que captura dependencias temporales en secuencias de 60 dias
+- **LSTM (64 unidades):** Capa recurrente con celdas de memoria y gates (forget, input, output) que captura dependencias temporales en secuencias de 60 periodos
 - **Dropout (0.2):** Regularizacion que desactiva aleatoriamente 20% de neuronas durante entrenamiento para evitar sobreajuste
 - **Dense (32, relu):** Capa fully-connected para combinacion no-lineal de features
-- **Dense (1):** Capa de salida que produce el precio de apertura predicho (valor escalar)
+- **Dense (1):** Salida escalar con el precio estimado
 
 ### Entrenamiento
 
@@ -104,10 +79,34 @@ Total:                                    20,033 (~78 KB)
 
 | Metrica | Valor | Interpretacion |
 |---|---|---|
-| **MAE** | $7,001.49 USD | Error promedio absoluto de la prediccion |
-| **RMSE** | $8,075.99 USD | Error cuadratico medio (penaliza mas errores grandes) |
+| **MAE** | $7,001.49 USD | Error promedio absoluto |
+| **RMSE** | $8,075.99 USD | Error cuadratico medio (penaliza errores grandes) |
 
-Con Bitcoin en rango ~$65K-$73K, esto representa un error relativo de ~10%. El modelo captura la tendencia general del mercado, coherente con su proposito educativo.
+El modelo logra capturar la tendencia general del mercado y seguir los movimientos de precio con un margen de error coherente para un activo de alta volatilidad como Bitcoin.
+
+---
+
+## Integracion con LLM — Asistente IA
+
+El chatbot no es un wrapper generico. Recibe como contexto un snapshot completo del estado actual del dashboard:
+
+```
+- Ultimo precio de apertura y cierre
+- Prediccion LSTM y delta porcentual
+- MAE y RMSE del backtest
+- Momentum absoluto y porcentual
+- Volatilidad anualizada
+- Nivel de riesgo calculado
+```
+
+Con estos datos, el LLM genera respuestas fundamentadas en numeros reales, no en conocimiento generico. Soporta dos proveedores:
+
+| Proveedor | Modelo | Uso |
+|---|---|---|
+| Groq | Llama 3.3 70B | Prioridad (inferencia rapida) |
+| OpenAI | GPT-3.5-turbo | Fallback |
+
+Ademas, las graficas de Plotly.js tienen listeners que al hacer clic o zoom generan preguntas contextuales automaticas a la IA (por ejemplo: "hiciste clic en la fecha X con precio Y, ¿que paso con Bitcoin en ese periodo?").
 
 ---
 
@@ -119,7 +118,7 @@ Con Bitcoin en rango ~$65K-$73K, esto representa un error relativo de ~10%. El m
 | Backend | FastAPI, Python 3.12, Uvicorn |
 | Datos | Pandas, NumPy, API de Binance |
 | Frontend | HTML/CSS/JS vanilla, Plotly.js (graficas interactivas) |
-| LLM (Chatbot) | Groq (Llama 3.3 70B) / OpenAI (GPT-3.5-turbo) via SDK de OpenAI |
+| LLM | Groq (Llama 3.3 70B) / OpenAI (GPT-3.5-turbo) via SDK de OpenAI |
 | Despliegue | Render (tensorflow-cpu) |
 
 ---
@@ -143,8 +142,7 @@ catcoin/
 ├── bitcoin_dataset_actualizado.csv  # Dataset OHLCV diario (~3100+ filas)
 ├── bitcoin_price_predictor.h5   # Modelo LSTM entrenado (formato HDF5)
 ├── requirements.txt             # Dependencias Python
-├── .python-version              # Python 3.12.10
-└── .env                         # Variables de entorno (no incluido en repo)
+└── .python-version              # Python 3.12.10
 ```
 
 ---
@@ -157,7 +155,7 @@ catcoin/
 | `GET` | `/dashboard` | Dashboard interactivo con graficas y prediccion |
 | `GET` | `/api/health` | Estado del servidor y filas en dataset |
 | `GET` | `/api/dashboard?last_n=365` | JSON con series OHLCV, backtest, prediccion e insights |
-| `GET` | `/api/predict-next` | Prediccion del precio de apertura del dia siguiente |
+| `GET` | `/api/predict-next` | Estimacion del precio de apertura del siguiente periodo |
 | `POST` | `/api/assistant` | Chatbot IA contextual con datos del dashboard |
 
 ---
@@ -204,30 +202,23 @@ Abrir en el navegador: `http://127.0.0.1:8000`
 
 ---
 
-## Funcionalidades principales
+## Funcionalidades
 
 ### Landing page educativa
 - Que es Bitcoin: descentralizacion, escasez (21M), criptografia
 - Historia: whitepaper 2008, bloque genesis 2009, Pizza Day 2010, ETF 2024
 - Video explicativo embebido
-- Seccion del equipo
-- IA contextual: clic en cualquier seccion para obtener explicaciones de la IA
+- IA contextual: clic en cualquier seccion para obtener explicaciones generadas por la IA
 
 ### Dashboard interactivo
-- **Prediccion LSTM:** Precio de apertura estimado para manana con delta y porcentaje de cambio
-- **Metricas de backtest:** MAE y RMSE del modelo sobre el conjunto de prueba (80/20)
-- **Insights del mercado:** Momentum (tendencia), volatilidad anualizada, nivel de riesgo (baja/media/alta)
+- **Estimacion LSTM:** Precio de apertura estimado con delta y porcentaje de cambio
+- **Metricas de backtest:** MAE y RMSE sobre conjunto de prueba (split 80/20)
+- **Insights del mercado:** Momentum (tendencia del periodo), volatilidad anualizada, nivel de riesgo (baja/media/alta)
 - **Grafica OHLC + Volumen:** Candlestick chart interactivo con Plotly.js
-- **Grafica de backtest:** Comparacion visual de valores reales vs predicciones del modelo
-- **Chatbot IA:** Asistente que responde preguntas usando datos reales del dashboard como contexto
-- **Tooltips contextuales:** Clic en puntos de las graficas o tarjetas para obtener explicaciones de la IA
+- **Grafica de backtest:** Comparacion visual valores reales vs estimaciones del modelo
+- **Chatbot IA:** Asistente que responde usando datos reales del dashboard como contexto
+- **Tooltips contextuales:** Clic en puntos de las graficas o tarjetas para obtener analisis de la IA
 - **Configuracion:** Selector de ventana temporal (90-1500 dias), refresh, health check
 
 ### Auto-actualizacion
-El servidor verifica diariamente si el dataset esta actualizado. Si no lo esta, ejecuta automaticamente `descargar.py` para obtener los datos mas recientes de Binance y recarga el modelo con los nuevos datos.
-
----
-
-## Equipo
-
-Proyecto desarrollado para el Hackathon Bitcoin Mexico 2026.
+El servidor verifica diariamente si el dataset esta actualizado. Si no lo esta, ejecuta automaticamente `descargar.py` para obtener los datos mas recientes de Binance y recarga el predictor con los nuevos datos.
