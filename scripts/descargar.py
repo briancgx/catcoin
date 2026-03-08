@@ -1,6 +1,9 @@
+from pathlib import Path
 import requests
 import pandas as pd
 import time
+
+ROOT = Path(__file__).resolve().parent.parent
 
 url = "https://api.binance.com/api/v3/klines"
 
@@ -53,7 +56,9 @@ df = df.astype({
     "volume": float
 })
 
-df.to_csv("bitcoin_dataset_actualizado.csv", index=False)
+output_path = ROOT / "data" / "bitcoin_dataset_actualizado.csv"
+output_path.parent.mkdir(parents=True, exist_ok=True)
+df.to_csv(output_path, index=False)
 
 print("Dataset descargado")
 print(df.tail())

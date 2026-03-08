@@ -24,8 +24,8 @@ from app.services.predictor import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-DATASET_PATH = ROOT / "bitcoin_dataset_actualizado.csv"
-MODEL_PATH = ROOT / "bitcoin_price_predictor.h5"
+DATASET_PATH = ROOT / "data" / "bitcoin_dataset_actualizado.csv"
+MODEL_PATH = ROOT / "data" / "bitcoin_price_predictor.h5"
 
 app = FastAPI(title="Bitcoin Predictor", version="0.1.0")
 
@@ -48,7 +48,7 @@ def check_and_update_dataset():
 
     import subprocess
     import sys
-    script_path = ROOT / "descargar.py"
+    script_path = ROOT / "scripts" / "descargar.py"
     print(f"Updating dataset for {today} using {script_path}...")
     try:
         subprocess.run([sys.executable, str(script_path)], cwd=str(ROOT), check=True)
