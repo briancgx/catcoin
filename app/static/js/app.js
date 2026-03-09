@@ -82,6 +82,15 @@ function renderPriceChart(series) {
         _ctxAsk(q, r.left + r.width / 2, r.top + 80);
       }
     });
+    el.on("plotly_doubleclick", function () {
+      Plotly.relayout(el, {
+        "xaxis.autorange": true,
+        "yaxis.autorange": true,
+        "yaxis2.autorange": true
+      });
+      const t = document.getElementById("ctxTooltip");
+      if (t) t.setAttribute("hidden", "");
+    });
   }
 }
 
@@ -109,6 +118,14 @@ function renderBacktestChart(backtest) {
         const r = el.getBoundingClientRect();
         _ctxAsk(q, r.left + r.width / 2, r.top + 80);
       }
+    });
+    el.on("plotly_doubleclick", function () {
+      Plotly.relayout(el, {
+        "xaxis.autorange": true,
+        "yaxis.autorange": true
+      });
+      const t = document.getElementById("ctxTooltip");
+      if (t) t.setAttribute("hidden", "");
     });
   }
 }
